@@ -21,10 +21,7 @@ This project implements an interrupt-driven ultrasonic distance measurement syst
 - ISR-based GPIO handler for echo pulse edge detection
 - Timer1A configured in one-shot mode
 - Delay using software (microsecond scale)
-- Calculation:  
-  \[
-  \text{Distance} = \frac{\text{Time} \times \text{Speed of Sound}}{2}
-  \]
+- Calculation:
   Speed of sound is approximated at ~343 m/s
 
 ## File Structure
