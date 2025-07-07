@@ -8,9 +8,9 @@ volatile uint8_t direction = original; // 1 for original order PN1, PN0, PF4, PF
 #define MAX_DISTANCE_STR_LEN 10
 #define SPEED_OF_SOUND_CM_PER_US (0.03316 + 0.004 * 25)
 
+
+//  Configuring  the Timer for measuring the time of flight of the ultrasonic wave
 void configTimer1A(){
-
-
 
     SYSCTL_RCGCTIMER_R |= (1<<1); // timer 1 activated
       while(!(SYSCTL_PRTIMER_R & (1<<1)));
@@ -18,12 +18,9 @@ void configTimer1A(){
       TIMER1_CFG_R = 0x00; // 32bits mode
       // TIMER1_TAMR_R = 0x32; // 32 math enabled, upwards, periodic mode
      TIMER1_TAMR_R = 0x11; // match disabled, one shot
-
-    //  TIMER1_TAPR_R = 245-1; //prescaler, match disabled, timer counts down
-      // TIMER1_TAILR_R= 65306-1; // ILR = ceil(16M/123*0.5)
-      //TIMER1_CTL_R |= 0x01; // start the timer
-
-
+     //TIMER1_TAPR_R = 245-1; //prescaler, match disabled, timer counts down
+     //TIMER1_TAILR_R= 65306-1; // ILR = ceil(16M/123*0.5)
+     //TIMER1_CTL_R |= 0x01; // start the timer
 
 }
 

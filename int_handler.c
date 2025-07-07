@@ -9,13 +9,13 @@ int semaphore;
 
 
 void IntPortDHandler(void) {
-    GPIO_PORTD_AHB_ICR_R = 0x02;
+    GPIO_PORTD_AHB_ICR_R = 0x02; // clear interrupt fag
     if (GPIO_PORTD_AHB_DATA_R & 0x02) {  // Rising edge detected
         TIMER1_CTL_R |= 0x01;  // Start Timer 1
 
     } else {  // Falling edge detected
 
-        duration = TIMER1_TAR_R;
+        duration = TIMER1_TAR_R; // time of flight of ultrasonic wave is recorded
         TIMER1_CTL_R &= ~0x01;  // Stop Timer 1
        TIMER1_TAV_R = 0x00000000;
 
