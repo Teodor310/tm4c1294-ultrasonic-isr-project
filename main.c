@@ -1,4 +1,7 @@
-
+/* The program is designed to measure the time of flight of the ultrasonic wave emitted by the ultrasonic sensor.
+ * It has additional functionaly to test the ISR capabilities of the microcontroller by measuring the time of buttons
+ * on the microcontroller being pressed.
+ */
 #include "inc/tm4c1294ncpdt.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -24,21 +27,22 @@ void configTimer1A(){
 
 }
 
-// Configure Ports for LEDs
+// Configure Ports
 void configPorts(void) {
 
+    // Configure Ports for the Buttons functionality
         SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R8; // => enabling clock for PORTL, PORTJ
         while (!(SYSCTL_PRGPIO_R & ((1 << 8)))); // Wait for ports to be ready
         GPIO_PORTJ_AHB_PUR_R = 0x01;
         GPIO_PORTJ_AHB_DEN_R = 0x01;
         GPIO_PORTJ_AHB_DIR_R = 0x00;
 
-// Port D
+// Configuring Port D (Echo pin and Trigger pin)
         SYSCTL_RCGCGPIO_R |= SYSCTL_RCGCGPIO_R3;  // Enable clock for Port D
         while (!(SYSCTL_PRGPIO_R & SYSCTL_RCGCGPIO_R3));  // Wait for clock stability
 
-        GPIO_PORTD_AHB_DIR_R |= ULTRASONIC_TRIGGER;      // PD0 as output
-        GPIO_PORTD_AHB_DIR_R &= ~ULTRASONIC_ECHO;       // PD1 as input
+        GPIO_PORTD_AHB_DIR_R |= ULTRASONIC_TRIGGER;      // PD0 as output, trigger pin
+        GPIO_PORTD_AHB_DIR_R &= ~ULTRASONIC_ECHO;       // PD1 as input, echo pin
         GPIO_PORTD_AHB_DEN_R |= (ULTRASONIC_TRIGGER | ULTRASONIC_ECHO);  // Enable digital I/O
 
 
@@ -53,6 +57,8 @@ void delayTimer1A(){
     TIMER1_CTL_R &= ~0x01; // stops Timer 1A
 }
 
+
+// Check whether timer works,
 void TIMER1A_Handler(void) {
     while ((TIMER1_CTL_R & (1 << 0)) == 1) {  // Check if Timer 1 is enabled
         while ((TIMER1_RIS_R & (1 << 0)) == 0);  // Wait for timeout
@@ -62,6 +68,8 @@ void TIMER1A_Handler(void) {
     }
 
 }
+
+// optional function for printing out the time of flight
 void printNumber(){
     /*
     if ((TIMER1_CTL_R & (1 << 0)) == 1){
@@ -78,14 +86,15 @@ void printNumber(){
 
 
 
-// ULTRASONIC
 
 
+// Delay function
 void delayMicroseconds(uint32_t microseconds) {
     uint32_t counter;
     for (counter = 0; counter < (microseconds * 3); counter++);
 }
 
+// Triggering ultrasonic pulse
 void triggerUltrasonicPulse() {
     GPIO_PORTD_AHB_DATA_R |= ULTRASONIC_TRIGGER;  // Set trigger high
     delayMicroseconds(10);                         // Wait 10 microseconds
@@ -105,6 +114,7 @@ int main(void) {
        // printNumber();
         triggerUltrasonicPulse();
         delayMicroseconds(500000);
+        // Calculating the distance to the object based on the time of flight of the ultrasonic wave
         uint32_t   measuredDistance = ((((float)duration/ 16000000) * 34300) / 2);
 
 

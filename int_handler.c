@@ -7,7 +7,10 @@ extern volatile uint8_t direction;
 int semaphore;
 
 
-
+/* Second pin of Port  D is assigned to be an Echo Pin.  When the sensor is triggered it emits an ultrasonic wave and
+ * sets Echo Pin high. When the emitted wave is reflected and returns back to the sensor Echo Pin goes low.
+ * ISR ensures that time of Echo Pin being high is measured.
+ */
 void IntPortDHandler(void) {
     GPIO_PORTD_AHB_ICR_R = 0x02; // clear interrupt fag
     if (GPIO_PORTD_AHB_DATA_R & 0x02) {  // Rising edge detected
@@ -26,7 +29,9 @@ void IntPortDHandler(void) {
 }
 
 
-void IntPortJHandler(void) { // measure the time of the button being pressed
+// Additional functionality to test the ISR
+// It measures the time of the button being pressed
+void IntPortJHandler(void) {
     if (!(GPIO_PORTJ_AHB_DATA_R & 0x01)) {  // Rising edge detected
         TIMER1_CTL_R |= 0x01;  // Start Timer 1
 
@@ -42,13 +47,7 @@ void IntPortJHandler(void) { // measure the time of the button being pressed
     GPIO_PORTJ_AHB_ICR_R = 0x01;  // Clear PJ0 interrupt
 
 }
-/*
-    if (GPIO_PORTJ_AHB_RIS_R & 0x01) {
-        GPIO_PORTJ_AHB_ICR_R = 0x01;  // Clear interrupt flag
-        printf("GPIO Port J Interrupt Rising\n");
 
-        // Add logic here for what happens on Port J interrupt (e.g., toggle LED)
-    } */
 
 
 
@@ -60,7 +59,7 @@ void config_gpio_interrupts(void) {
         GPIO_PORTJ_AHB_IM_R |= 0x01;    // Unmask the interrupt
         NVIC_EN1_R |= (1 << 19);  // Enable IRQ 51 for Port J 32 + 19 = 51
 
-
+        // Configure GPIO Port D for edge-triggered interrupts
         GPIO_PORTD_AHB_IS_R &= ~0x02;   // Edge-sensitive
         GPIO_PORTD_AHB_IBE_R |= 0x02;   // Both rising and falling edges
         GPIO_PORTD_AHB_ICR_R |= 0x02;   // Clear any prior interrupt
